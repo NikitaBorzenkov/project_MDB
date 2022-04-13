@@ -17,60 +17,84 @@ P.S. Здесь есть несколько вариантов решения з
 
 'use strict';
 
-const movieDB = {
-    movies: [
-        "Логан",
-        "Лига справедливости",
-        "Ла-ла лэнд",
-        "Одержимость",
-        "Скотт Пилигрим против..."
-    ]
-};
+document.addEventListener('DOMContentLoaded', () => {
 
-const adv = document.querySelectorAll('.promo__adv img'),
-      poster = document.querySelector('.promo__bg'),
-      movieList = document.querySelector('.promo__interactive-list'),
-      filmBtn = document.querySelector('.add button'),
-      input = document.querySelector('.adding__input'),
-      genre = poster.querySelector('.promo__genre');
+    const movieDB = {
+        movies: [
+            "Логан", 
+            "Лига справедливости",
+            "Ла-ла лэнд",
+            "Одержимость",
+            "Скотт Пилигрим против..."
+        ]
+    };
+    
+    const adv = document.querySelectorAll('.promo__adv img'),
+          poster = document.querySelector('.promo__bg'),
+          movieList = document.querySelector('.promo__interactive-list'),
+          addForm = document.querySelector('form.add'),
+          addInput = addForm.querySelector('.adding__input'),
+          checkbox = addForm.querySelector('[type="checkbox"]'),
+          genre = poster.querySelector('.promo__genre');
+    
+    const deleteAdv = (arr) => {
+        arr.forEach(item => {
+            item.remove();
+        });
+    };
 
-adv.forEach(item => {
-    item.remove();
-});
+    const makeChanges = () => {
+        genre.textContent = 'драма';
+    
+        poster.style.backgroundImage = `url(img/bg.jpg)`;       
+    };
 
-genre.textContent = 'драма';
+    const sortArr = (arr) => {
+        arr.sort();
+    };
 
-poster.style.backgroundImage = `url(img/bg.jpg)`;
+    addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-movieList.innerHTML = " ";
-
-movieDB.movies.sort();
-
-movieDB.movies.forEach((film, i) => {
-    movieList.innerHTML += `
-    <li class="promo__interactive-item">${i + 1} ${film}
-        <div class="delete"></div>
-    </li>
-    `;
-});
-
-filmBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (input.value.length > 21) {
-        input.value = input.value.substr(0, 21)+'...';
-    }
-    movieDB.movies.push(input.value);
-    input.value = '';
-    movieList.innerHTML = " ";
-    movieDB.movies.sort();
-    movieDB.movies.forEach((film, i) => {
-        movieList.innerHTML += `
-        <li class="promo__interactive-item">${i + 1} ${film}
-            <div class="delete"></div>
-        </li>
-        `;
+        let newFilm = addInput.value;
+        const favorite = checkbox.checked;
+        if (newFilm) {
+            if (newFilm.length > 21) {
+                newFilm = `${newFilm.substr(0, 21)}...`;
+            }
+            if (favorite) {
+                console.log("Добавляем любимый фильм");
+            }
+            movieDB.movies.push(newFilm);
+            sortArr(movieDB.movies);
+            createMovieList(movieDB.movies, movieList);
+        }
+        e.target.reset();
     });
-});
 
+    function createMovieList(films, parent) {
+        parent.innerHTML = "";
+        sortArr(films);
+        films.forEach((film, i) => {
+            parent.innerHTML += `
+            <li class="promo__interactive-item">${i + 1} ${film}
+                <div class="delete"></div>
+            </li>
+            `;
+        });
+        document.querySelectorAll(`.delete`).forEach((btn, i) => {
+            btn.addEventListener('click', () => {
+                btn.parentElement.remove();
+                movieDB.movies.splice(i, 1);
+                createMovieList(films, parent);
+            });
+        });
+    }
+    
+    deleteAdv(adv);
+    makeChanges();
+    createMovieList(movieDB.movies, movieList);
+    
+});
 
 
